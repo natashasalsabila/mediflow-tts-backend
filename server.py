@@ -1,13 +1,13 @@
 from pathlib import Path
 from urllib.parse import urljoin
-import uuid
 
 import edge_tts
-from fastapi import FastAPI, HTTPException, Request
+import uuid
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-app = FastAPI(title="MediFlow TTS Backend")
+app = FastAPI()
 
 VOICE = "id-ID-GadisNeural"
 AUDIO_DIR = Path("tts_audio")
@@ -22,17 +22,15 @@ app.add_middleware(
 
 app.mount("/audio", StaticFiles(directory=AUDIO_DIR), name="audio")
 
-
 @app.get("/")
-def home() -> dict[str, str]:
-    return {"message": "MediFlow Edge TTS Server Running"}
-
+def home():
+    return {"message": "Edge TTS Server Running"}
 
 @app.get("/tts")
-async def tts(text: str, request: Request) -> dict[str, str]:
+async def tts(text: str, request: Request):
     normalized_text = text.strip()
     if not normalized_text:
-        raise HTTPException(status_code=400, detail="Text cannot be empty")
+        return {"status": "error", "message": "Text cannot be empty"}
 
     filename = f"audio_{uuid.uuid4().hex}.mp3"
     output_path = AUDIO_DIR / filename
